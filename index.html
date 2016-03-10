@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<script src="http://code.jquery.com/jquery.min.js"></script>
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+	<title></title>
+	<style>
+		* {
+			margin:0; padding:0;
+		}
+		#console {
+			position:absolute;
+			right:0; bottom:0;
+			font-size:15pt;
+		}
+		#console input[type="button"] {
+			padding:8px;
+			margin:0 4px 8px 0;
+			background:#889;
+		}
+	</style>
+</head>
+<body>
+<script src="js/main.js"></script>
+<script src="js/PhotoEditor.js"></script>
+<div id="console">
+scale: <input type="range" min="100" max="150" id="scale" /><br />
+<input type="button" value="undo" id="undo" />
+<input type="button" value="redo" id="redo" />
+<input type="button" value="clear" id="clear" />
+<input type="button" value="rotate" id="rotate" />
+<br />
+<input type="button" value="←" id="left" />
+<input type="button" value="↑" id="up" />
+<input type="button" value="→" id="right" />
+<input type="button" value="↓" id="down" />
+<br />
+<input type="button" value="IMG1" id="IMG1" />
+<input type="button" value="IMG2" id="IMG2" />
+<input type="button" value="IMG3" id="IMG3" />
+</div>
+</body>
+</html>
+
