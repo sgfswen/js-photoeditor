@@ -169,7 +169,7 @@ PhotoEditor.prototype.draw = function() {
 	this.canvasCtx.save();
 	this.canvasCtx.translate(this.canvas.width/2, this.canvas.height/2);
 	this.canvasCtx.rotate(deg * Math.PI / 180);
-    this.canvasCtx.translate( -1 * this.canvas.width/2, -1 * this.canvas.width/2 );    
+    this.canvasCtx.translate( -1 * this.canvas.width/2, -1 * this.canvas.height/2 );    
 	this.canvasCtx.drawImage(this.img, sx, sy, sw, sh, 0, 0, this.canvas.width, this.canvas.height);
 	this.canvasCtx.restore();
 
