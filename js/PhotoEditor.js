@@ -17,7 +17,7 @@ var PhotoEditor = function(width, height, src){
 	this.editCtxIdx = 0;
 	this.editCtxLog = [];
 
-	this.canvas 	= this.makeCanvas(width, height);
+	this.canvas 	= PhotoEditor.utils.makeCanvas(PhotoEditor.CANVAS_ID, width, height);
 	this.canvasCtx 	= this.canvas.getContext('2d');
 	this.img 		= null;
 
@@ -71,7 +71,7 @@ PhotoEditor.prototype.initEditCtx = function() {
 	this.editCtxLog = [];
 	var rect = this.editRect();
 	this.updateEditCtxPos(rect.x, rect.y, rect.w, rect.h);
-	this.defaultCtx = this.utils.copy(this.editCtx);
+	this.defaultCtx = PhotoEditor.utils.copy(this.editCtx);
 }
 
 
@@ -136,22 +136,12 @@ PhotoEditor.prototype.updateEditCtxPos = function(x,y,width,height) {
 PhotoEditor.prototype.updateEditCtxLog = function(x,y,w,h) {
 	if (this.log) {
 		this.editCtxLog.splice(this.editCtxIdx+1, this.editCtxLog.length-1);
-		this.editCtxLog.push(this.utils.copy(this.editCtx));
+		this.editCtxLog.push(PhotoEditor.utils.copy(this.editCtx));
 		this.editCtxIdx = this.editCtxLog.length-1;
 	}
 }
 
 
-/**
- *
- */
-PhotoEditor.prototype.makeCanvas = function(width, height) {
-	return this.utils.makeElm('canvas', {
-		id 		: PhotoEditor.CANVAS_ID,
-		width 	: width,
-		height 	: height
-	});
-}
 
 
 /**
@@ -273,7 +263,7 @@ PhotoEditor.prototype.clear = function() {
 PhotoEditor.prototype.undo = function() {
 	if (this.editCtxIdx > 0) {
 		this.editCtxIdx--;
-		this.editCtx = this.utils.copy(this.editCtxLog[this.editCtxIdx]);
+		this.editCtx = PhotoEditor.utils.copy(this.editCtxLog[this.editCtxIdx]);
 		this.draw();
 	}
 }
@@ -285,7 +275,7 @@ PhotoEditor.prototype.undo = function() {
 PhotoEditor.prototype.redo = function() {
 	if (this.editCtxIdx+1 < this.editCtxLog.length) {
 		this.editCtxIdx++;
-		this.editCtx = this.utils.copy(this.editCtxLog[this.editCtxIdx]);
+		this.editCtx = PhotoEditor.utils.copy(this.editCtxLog[this.editCtxIdx]);
 		this.draw();
 	}
 }
@@ -295,7 +285,7 @@ PhotoEditor.prototype.redo = function() {
  *
  *
  */
-PhotoEditor.prototype.utils = {
+PhotoEditor.utils = {
 	copy : function(obj) {
 		return JSON.parse(JSON.stringify(obj));
 	}, 
@@ -305,6 +295,13 @@ PhotoEditor.prototype.utils = {
 			elm[name] = props[name];
 		}
 		return elm;
+	},
+	makeCanvas : function(id, width, height) {
+		return PhotoEditor.utils.makeElm('canvas', {
+			id 		: id,
+			width 	: width,
+			height 	: height
+		});
 	}
 }
 
