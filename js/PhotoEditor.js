@@ -302,6 +302,7 @@ PhotoEditor.prototype.move = function(x,y) {
  */
 PhotoEditor.prototype.clear = function() {
 	this.editCtx = $.extend({},this.defaultCtx);
+	this.moveBaseCtx = PhotoEditor.utils.copy(this.editCtx);
 	this.updateEditCtxLog();
 	this.draw();
 }
