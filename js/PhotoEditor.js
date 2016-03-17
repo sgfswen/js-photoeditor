@@ -109,10 +109,8 @@ PhotoEditor.prototype.editRect = function() {
 	var priorityToHeight = this.canvas.height >= this.canvas.width;
 	var rect = make.call(this, priorityToHeight);
 
-	if (!priorityToHeight && rect.y < 0) {
-		rect = make.call(this, priorityToHeight);
-	}
-	else if (priorityToHeight && rect.x < 0) {
+	if (!priorityToHeight && rect.y < 0
+	 || priorityToHeight && rect.x < 0) {
 		rect = make.call(this, !priorityToHeight);
 	}
 
