@@ -180,12 +180,12 @@ PhotoEditor.prototype.scale = function(scale) {
 		return;
 	}
 
-	scale = scale - 1;
+	scale = 1-(scale-1);
 
-	var w = this.defaultCtx.width  	- this.defaultCtx.width * scale;
-	var h = this.defaultCtx.height 	- this.defaultCtx.height * scale;
-	var x = this.defaultCtx.x 	 	+ ( this.defaultCtx.width - w ) / 2;
-	var y = this.defaultCtx.y 	 	+ ( this.defaultCtx.width - h ) / 2;
+	var w = this.defaultCtx.width * scale;
+	var h = this.defaultCtx.height * scale;
+	var x = this.defaultCtx.x+(this.defaultCtx.width-w)/2
+	var y = this.defaultCtx.y+(this.defaultCtx.height-h)/2
 
 	this.updateEditCtxPos(x, y, w, h);
 
