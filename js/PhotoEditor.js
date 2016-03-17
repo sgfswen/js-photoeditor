@@ -18,9 +18,9 @@ var PhotoEditor = function(width, height, src){
 	this.editCtxIdx = 0;
 	this.editCtxLog = [];
 
-	this.canvas 	= PhotoEditor.utils.makeCanvas(PhotoEditor.CANVAS_ID, width, height);
+	this.canvas 	= PhotoEditor.utils.makeCanvas(width, height);
 	this.canvasCtx 	= this.canvas.getContext('2d');
-	this.buffer 	= PhotoEditor.utils.makeCanvas(PhotoEditor.CANVAS_ID, width*4, height*4);
+	this.buffer 	= PhotoEditor.utils.makeCanvas(width*4, height*4);
 	this.bufferCtx 	= this.buffer.getContext('2d');
 	this.img 		= null;
 
@@ -38,7 +38,6 @@ var PhotoEditor = function(width, height, src){
 }
 
 
-PhotoEditor.CANVAS_ID = 'photo_editor_canvas';
 PhotoEditor.MIN_SCALE = 1;
 PhotoEditor.MAX_SCALE = 1.5;
 
@@ -352,9 +351,8 @@ PhotoEditor.utils = {
 		}
 		return elm;
 	},
-	makeCanvas : function(id, width, height) {
+	makeCanvas : function(width, height) {
 		return PhotoEditor.utils.makeElm('canvas', {
-			id 		: id,
 			width 	: width,
 			height 	: height
 		});
