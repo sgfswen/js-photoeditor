@@ -13,18 +13,23 @@ var PhotoEditor = function(width, height, src){
 		height 	: 0,
 		rotate 	: 0
 	}
-	this.defaultCtx = {}
+	this.defaultCtx = {};
+	this.moveBaseCtx = {};
 	this.editCtxIdx = 0;
 	this.editCtxLog = [];
 
 	this.canvas 	= PhotoEditor.utils.makeCanvas(PhotoEditor.CANVAS_ID, width, height);
 	this.canvasCtx 	= this.canvas.getContext('2d');
+	this.buffer 	= PhotoEditor.utils.makeCanvas(PhotoEditor.CANVAS_ID, width*4, height*4);
+	this.bufferCtx 	= this.buffer.getContext('2d');
 	this.img 		= null;
 
-	this.maxX 		= 0;
-	this.maxY 		= 0;
+	this.rangeX 	= 0;
+	this.rangeY 	= 0;
 
 	this.log 		= false;
+
+	this.debug 		= false;
 
 	if (typeof src !== 'undefined') {
 		this.load(src);
@@ -72,6 +77,7 @@ PhotoEditor.prototype.initEditCtx = function() {
 	var rect = this.editRect();
 	this.updateEditCtxPos(rect.x, rect.y, rect.w, rect.h);
 	this.defaultCtx = PhotoEditor.utils.copy(this.editCtx);
+	this.moveBaseCtx = PhotoEditor.utils.copy(this.editCtx);
 }
 
 
@@ -124,8 +130,6 @@ PhotoEditor.prototype.updateEditCtxPos = function(x,y,width,height) {
 	this.editCtx.y 		= y;
 	this.editCtx.width 	= width;
 	this.editCtx.height = height;
-	this.maxX 			= this.editCtx.x * 2;
-	this.maxY 			= this.editCtx.y * 2;
 	this.updateEditCtxLog();
 }
 
@@ -149,19 +153,75 @@ PhotoEditor.prototype.updateEditCtxLog = function(x,y,w,h) {
  */
 PhotoEditor.prototype.draw = function() {
 
-	var sx 	= this.editCtx.x;
-	var sy 	= this.editCtx.y;
-	var sw 	= this.editCtx.width;
-	var sh 	= this.editCtx.height;
-	var deg = this.editCtx.rotate;
+	this.drawBuffer();
 
-	this.canvasCtx.clearRect(0, 0, this.img.width, this.img.height);
-	this.canvasCtx.save();
-	this.canvasCtx.translate(this.img.width/2, this.img.height/2);
-	this.canvasCtx.rotate(deg * Math.PI / 180);
-    this.canvasCtx.translate( -1 * this.canvas.width/2, -1 * this.canvas.height/2 );    
-	this.canvasCtx.drawImage(this.img, sx, sy, sw, sh, 0, 0, this.canvas.width, this.canvas.height);
-	this.canvasCtx.restore();
+	var x 	= this.editCtx.x;
+	var y 	= this.editCtx.y;
+	var w 	= this.editCtx.width;
+	var h 	= this.editCtx.height;
+
+	var width 	= this.buffer.width-this.img.width;
+	var height 	= this.buffer.height-this.img.height;
+
+	this.canvasCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+	this.canvasCtx.drawImage(this.buffer,width/2+x,height/2+y,w,h,0,0,this.canvas.width,this.canvas.height);
+
+}
+
+/**
+ *
+ */
+PhotoEditor.prototype.drawBuffer = function() {
+
+	var scale = 1;
+	if (this.isReversed()) {
+		if (
+			this.defaultCtx.width > this.img.height
+		 || this.defaultCtx.height < this.img.width
+		) {
+			scale = this.defaultCtx.width/this.img.height;
+		}
+		else if (
+			this.defaultCtx.height > this.img.width
+		 || this.defaultCtx.width < this.img.height) {
+			scale = this.defaultCtx.height/this.img.width;
+		}
+	}
+
+
+
+
+	if (this.isReversed()) {
+		this.rangeX = ( this.img.height * scale - this.editCtx.width  )/2;
+		this.rangeY = ( this.img.width  * scale - this.editCtx.height )/2;
+	}
+	else {
+		this.rangeX = ( this.img.width  * scale - this.editCtx.width )/2;
+		this.rangeY = ( this.img.height * scale - this.editCtx.height )/2;
+	}
+
+
+	var width 	= this.buffer.width-this.img.width;
+	var height 	= this.buffer.height-this.img.height;
+
+	this.bufferCtx.clearRect(0, 0, this.buffer.width, this.buffer.height);
+	this.bufferCtx.save();
+	this.bufferCtx.translate(this.buffer.width/2, this.buffer.height/2);
+	this.bufferCtx.rotate(this.editCtx.rotate * Math.PI / 180);
+	this.bufferCtx.scale(scale,scale);
+    this.bufferCtx.translate( -1 * this.buffer.width/2, -1 * this.buffer.height/2 );    
+	this.bufferCtx.drawImage(this.img, width/2, height/2, this.img.width, this.img.height);
+	this.bufferCtx.restore();
+
+
+	if (this.debug) {
+		var x = width/2+this.editCtx.x;
+		var y = height/2+this.editCtx.y;
+		var w = this.editCtx.width;
+		var h = this.editCtx.height;
+		this.bufferCtx.fillStyle = 'rgba(192, 80, 77, 0.7)';
+		this.bufferCtx.fillRect(x,y,w,h);
+	}
 
 }
 
@@ -188,6 +248,7 @@ PhotoEditor.prototype.scale = function(scale) {
 	var y = this.defaultCtx.y+(this.defaultCtx.height-h)/2
 
 	this.updateEditCtxPos(x, y, w, h);
+	this.moveBaseCtx = PhotoEditor.utils.copy(this.editCtx);
 
 	this.draw();
 
@@ -202,6 +263,7 @@ PhotoEditor.prototype.scale = function(scale) {
  * @param int degree
  */
 PhotoEditor.prototype.rotate = function(degree) {
+	this.clear();
 	this.editCtx.rotate = degree;
 	this.updateEditCtxLog();
 	this.draw();
@@ -218,23 +280,11 @@ PhotoEditor.prototype.rotate = function(degree) {
  */
 PhotoEditor.prototype.move = function(x,y) {
 
-	var deg = this.editCtx.rotate % 360;
+	var moveX = this.editCtx.x + x;
+	var moveY = this.editCtx.y + y;
 
-	if (deg == 90 || deg == 270) {
-		var tmp = x; x = y; y = tmp;
-		if (deg == 90) {
-			x *= -1; y *= -1;
-		}
-		else if (deg == 270) {
-			x *= -1;
-		}
-	}
-
-	var moveX	= this.editCtx.x + x;
-	var moveY	= this.editCtx.y + y;
-
-	moveX = this.maxX < moveX ? this.maxX : 0 > moveX ? 0 : moveX;
-	moveY = this.maxY < moveY ? this.maxY : 0 > moveY ? 0 : moveY;
+	moveX = Math.min(Math.max(moveX, this.moveBaseCtx.x - this.rangeX), this.moveBaseCtx.x + this.rangeX)
+	moveY = Math.min(Math.max(moveY, this.moveBaseCtx.y - this.rangeY), this.moveBaseCtx.y + this.rangeY)
 
 	this.editCtx.x = moveX;
 	this.editCtx.y = moveY;
@@ -266,6 +316,13 @@ PhotoEditor.prototype.undo = function() {
 		this.editCtx = PhotoEditor.utils.copy(this.editCtxLog[this.editCtxIdx]);
 		this.draw();
 	}
+}
+
+/**
+ *
+ */
+PhotoEditor.prototype.isReversed = function() {
+	return this.editCtx.rotate % 360 == 90 || this.editCtx.rotate % 360 == 270;
 }
 
 

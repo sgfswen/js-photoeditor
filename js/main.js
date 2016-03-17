@@ -1,7 +1,7 @@
 $(function(){
 
-	var editor = new PhotoEditor(320,320);
-	editor.load('data/image1.png', 
+	var editor = new PhotoEditor(300,400);
+	editor.load('data/image3.png', 
 		function(){
 			console.log('complete');
 		}, 
@@ -30,6 +30,7 @@ $(function(){
 	}).val(scale);
 
 	$('body').append($(editor.canvas));
+	// $('body').append($(editor.buffer));
 
 	var value = 10;
 	$('#up').click(function(){ editor.move(0,- value);});
