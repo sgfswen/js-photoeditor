@@ -155,9 +155,9 @@ PhotoEditor.prototype.draw = function() {
 	var sh 	= this.editCtx.height;
 	var deg = this.editCtx.rotate;
 
-	this.canvasCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+	this.canvasCtx.clearRect(0, 0, this.img.width, this.img.height);
 	this.canvasCtx.save();
-	this.canvasCtx.translate(this.canvas.width/2, this.canvas.height/2);
+	this.canvasCtx.translate(this.img.width/2, this.img.height/2);
 	this.canvasCtx.rotate(deg * Math.PI / 180);
     this.canvasCtx.translate( -1 * this.canvas.width/2, -1 * this.canvas.height/2 );    
 	this.canvasCtx.drawImage(this.img, sx, sy, sw, sh, 0, 0, this.canvas.width, this.canvas.height);
