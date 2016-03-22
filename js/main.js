@@ -150,5 +150,16 @@ $(function(){
 	})();
 
 
+	(function(){
+		var stats = new Stats();
+		stats.domElement.style.position = 'fixed';
+		stats.domElement.style.right	= '5px';
+		stats.domElement.style.top 		= '5px';
+		document.body.appendChild( stats.domElement );
+		setInterval(function(){
+			stats.update();
+		}, 1000/60);
+	})();
+
 });
 
