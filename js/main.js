@@ -1,7 +1,7 @@
 $(function(){
 
-	var editor = new PhotoEditor(300,400);
-	editor.load('data/image3.png', 
+	var editor = new PhotoEditor(400,300);
+	editor.load('data/image2.png', 
 		function(){
 			console.log('complete');
 		}, 
@@ -21,6 +21,7 @@ $(function(){
 	$('#rotate').click(function(){
 		degree += 90;
 		editor.rotate(degree);
+		$('#scale').val(100);
 	});
 
 	var scale = 100;
@@ -30,7 +31,7 @@ $(function(){
 	}).val(scale);
 
 	$('body').append($(editor.canvas));
-	// $('body').append($(editor.buffer));
+	$('body').append($(editor.buffer));
 
 	var value = 10;
 	$('#up').click(function(){ editor.move(0,- value);});
@@ -75,6 +76,7 @@ $(function(){
 		editor.canvas.addEventListener( 'mousedown', onMouseDown, false );
 		editor.canvas.addEventListener( 'mousemove', onMouseMove, false);
 		editor.canvas.addEventListener( 'mouseup', onMouseUp, false );
+		editor.canvas.addEventListener( 'mouseleave', onMouseUp, false );
 	})();
 
 
@@ -131,7 +133,6 @@ $(function(){
 				scale += (event.scale - prevScale)*10;
 				prevScale = event.scale;
 				scale = Math.min(Math.max(scale, 100), 150);
-				console.log(scale);
 				editor.scale(scale/100);
 			}
 		}

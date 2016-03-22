@@ -13,10 +13,9 @@ var PhotoEditor = function(width, height, src){
 		height 	: 0,
 		rotate 	: 0
 	}
-	this.defaultCtx = {};
-	this.moveBaseCtx = {};
-	this.editCtxIdx = 0;
-	this.editCtxLog = [];
+	this.defaultCtx 	= {};
+	this.editCtxIdx 	= 0;
+	this.editCtxLog 	= [];
 
 	this.canvas 	= PhotoEditor.utils.makeCanvas(width, height);
 	this.canvasCtx 	= this.canvas.getContext('2d');
@@ -24,12 +23,14 @@ var PhotoEditor = function(width, height, src){
 	this.bufferCtx 	= this.buffer.getContext('2d');
 	this.img 		= null;
 
-	this.rangeX 	= 0;
-	this.rangeY 	= 0;
+	this.minX 	= 0;
+	this.minY 	= 0;
+	this.maxX 	= 0;
+	this.maxY 	= 0;
 
 	this.log 		= false;
 
-	this.debug 		= false;
+	this.debug 		= true;
 
 	if (typeof src !== 'undefined') {
 		this.load(src);
@@ -38,7 +39,7 @@ var PhotoEditor = function(width, height, src){
 }
 
 
-PhotoEditor.MIN_SCALE = 1;
+PhotoEditor.MIN_SCALE = 1.0;
 PhotoEditor.MAX_SCALE = 1.5;
 
 
@@ -76,7 +77,6 @@ PhotoEditor.prototype.initEditCtx = function() {
 	var rect = this.editRect();
 	this.updateEditCtxPos(rect.x, rect.y, rect.w, rect.h);
 	this.defaultCtx = PhotoEditor.utils.copy(this.editCtx);
-	this.moveBaseCtx = PhotoEditor.utils.copy(this.editCtx);
 }
 
 
@@ -186,17 +186,18 @@ PhotoEditor.prototype.drawBuffer = function() {
 	}
 
 
-
-
 	if (this.isReversed()) {
-		this.rangeX = ( this.img.height * scale - this.editCtx.width  )/2;
-		this.rangeY = ( this.img.width  * scale - this.editCtx.height )/2;
+		this.minX = (this.img.width  - this.img.height * scale)/2;
+		this.minY = (this.img.height - this.img.width  * scale)/2;
+		this.maxX = (this.img.width  - this.img.height * scale)/2 + this.defaultCtx.width  - this.editCtx.width;
+		this.maxY = (this.img.width * scale - this.img.height)/2 + this.defaultCtx.height - this.editCtx.height;
 	}
 	else {
-		this.rangeX = ( this.img.width  * scale - this.editCtx.width )/2;
-		this.rangeY = ( this.img.height * scale - this.editCtx.height )/2;
+		this.minX = 0;
+		this.minY = 0;
+		this.maxX = (this.img.width  * scale - this.editCtx.width);
+		this.maxY = (this.img.height * scale - this.editCtx.height);
 	}
-
 
 	var width 	= this.buffer.width-this.img.width;
 	var height 	= this.buffer.height-this.img.height;
@@ -241,11 +242,9 @@ PhotoEditor.prototype.scale = function(scale) {
 
 	var w = this.defaultCtx.width * scale;
 	var h = this.defaultCtx.height * scale;
-	var x = this.defaultCtx.x+(this.defaultCtx.width-w)/2
-	var y = this.defaultCtx.y+(this.defaultCtx.height-h)/2
-
+	var x = this.editCtx.x+(this.editCtx.width-w)/2;
+	var y = this.editCtx.y+(this.editCtx.height-h)/2;
 	this.updateEditCtxPos(x, y, w, h);
-	this.moveBaseCtx = PhotoEditor.utils.copy(this.editCtx);
 
 	this.draw();
 
@@ -280,8 +279,8 @@ PhotoEditor.prototype.move = function(x,y) {
 	var moveX = this.editCtx.x + x;
 	var moveY = this.editCtx.y + y;
 
-	moveX = Math.min(Math.max(moveX, this.moveBaseCtx.x - this.rangeX), this.moveBaseCtx.x + this.rangeX)
-	moveY = Math.min(Math.max(moveY, this.moveBaseCtx.y - this.rangeY), this.moveBaseCtx.y + this.rangeY)
+	moveX = Math.min(Math.max(moveX, this.minX), this.maxX);
+	moveY = Math.min(Math.max(moveY, this.minY), this.maxY);
 
 	this.editCtx.x = moveX;
 	this.editCtx.y = moveY;
@@ -299,7 +298,6 @@ PhotoEditor.prototype.move = function(x,y) {
  */
 PhotoEditor.prototype.clear = function() {
 	this.editCtx = $.extend({},this.defaultCtx);
-	this.moveBaseCtx = PhotoEditor.utils.copy(this.editCtx);
 	this.updateEditCtxLog();
 	this.draw();
 }
