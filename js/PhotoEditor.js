@@ -59,7 +59,7 @@ PhotoEditor.prototype.load = function(src, onload, onerror) {
 	}
 	self.img.onload = function(){
 		self.initEditCtx();
-		self.draw();
+		self.render();
 		if ((typeof onload).toLowerCase() === 'function') {
 			onload();
 		}
@@ -148,9 +148,9 @@ PhotoEditor.prototype.updateEditCtxLog = function(x,y,w,h) {
 /**
  *
  */
-PhotoEditor.prototype.draw = function() {
+PhotoEditor.prototype.render = function() {
 
-	this.drawBuffer();
+	this.prerender();
 
 	var x 	= this.editCtx.x;
 	var y 	= this.editCtx.y;
@@ -168,7 +168,7 @@ PhotoEditor.prototype.draw = function() {
 /**
  *
  */
-PhotoEditor.prototype.drawBuffer = function() {
+PhotoEditor.prototype.prerender = function() {
 
 	var scale = 1;
 	if (this.isReversed()) {
@@ -250,7 +250,7 @@ PhotoEditor.prototype.scale = function(scale) {
 	var y = this.editCtx.y+(this.editCtx.height-h)/2;
 	this.updateEditCtxPos(x, y, w, h);
 
-	this.draw();
+	this.render();
 
 }
 
@@ -266,7 +266,7 @@ PhotoEditor.prototype.rotate = function(degree) {
 	this.clear();
 	this.editCtx.rotate = degree;
 	this.updateEditCtxLog();
-	this.draw();
+	this.render();
 }
 
 
@@ -291,7 +291,7 @@ PhotoEditor.prototype.move = function(x,y) {
 
 	this.updateEditCtxLog();
 
-	this.draw();
+	this.render();
 
 }
 
@@ -303,7 +303,7 @@ PhotoEditor.prototype.move = function(x,y) {
 PhotoEditor.prototype.clear = function() {
 	this.editCtx = $.extend({},this.defaultCtx);
 	this.updateEditCtxLog();
-	this.draw();
+	this.render();
 }
 
 
@@ -314,7 +314,7 @@ PhotoEditor.prototype.undo = function() {
 	if (this.editCtxIdx > 0) {
 		this.editCtxIdx--;
 		this.editCtx = PhotoEditor.utils.copy(this.editCtxLog[this.editCtxIdx]);
-		this.draw();
+		this.render();
 	}
 }
 
@@ -333,7 +333,7 @@ PhotoEditor.prototype.redo = function() {
 	if (this.editCtxIdx+1 < this.editCtxLog.length) {
 		this.editCtxIdx++;
 		this.editCtx = PhotoEditor.utils.copy(this.editCtxLog[this.editCtxIdx]);
-		this.draw();
+		this.render();
 	}
 }
 
