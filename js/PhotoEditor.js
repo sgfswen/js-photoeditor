@@ -19,7 +19,7 @@ var PhotoEditor = function(width, height, src){
 
 	this.canvas 	= PhotoEditor.utils.makeCanvas(width, height);
 	this.canvasCtx 	= this.canvas.getContext('2d');
-	this.buffer 	= PhotoEditor.utils.makeCanvas(width*4, height*4);
+	this.buffer 	= PhotoEditor.utils.makeCanvas(width*10, height*10);
 	this.bufferCtx 	= this.buffer.getContext('2d');
 	this.img 		= null;
 
