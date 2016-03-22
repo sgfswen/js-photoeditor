@@ -1,7 +1,7 @@
 $(function(){
 
 	var editor = new PhotoEditor(400,300);
-	editor.load('data/image2.png', 
+	editor.load('data/image3.png', 
 		function(){
 			console.log('complete');
 		}, 

@@ -188,9 +188,11 @@ PhotoEditor.prototype.drawBuffer = function() {
 
 	if (this.isReversed()) {
 		this.minX = (this.img.width  - this.img.height * scale)/2;
-		this.minY = (this.img.height - this.img.width  * scale)/2;
 		this.maxX = (this.img.width  - this.img.height * scale)/2 + this.defaultCtx.width  - this.editCtx.width;
-		this.maxY = (this.img.width * scale - this.img.height)/2 + this.defaultCtx.height - this.editCtx.height;
+		this.minY = (this.img.height - this.img.width  * scale)/2;
+		this.maxY = this.img.height > this.img.width 
+				  ? (this.img.height - this.img.width  * scale)/2 + this.defaultCtx.width  - this.editCtx.width
+				  : (this.img.width * scale - this.img.height)/2 + this.defaultCtx.height - this.editCtx.height;
 	}
 	else {
 		this.minX = 0;
