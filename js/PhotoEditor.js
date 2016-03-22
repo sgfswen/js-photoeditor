@@ -19,7 +19,7 @@ var PhotoEditor = function(width, height, src){
 
 	this.canvas 	= PhotoEditor.utils.makeCanvas(width, height);
 	this.canvasCtx 	= this.canvas.getContext('2d');
-	this.buffer 	= PhotoEditor.utils.makeCanvas(width*10, height*10);
+	this.buffer 	= PhotoEditor.utils.makeCanvas(width*8, height*8);
 	this.bufferCtx 	= this.buffer.getContext('2d');
 	this.img 		= null;
 
@@ -30,7 +30,10 @@ var PhotoEditor = function(width, height, src){
 
 	this.log 		= false;
 
-	this.debug 		= true;
+	this.debug 		= false;
+
+	this.isReady 	= false;
+	this.updated 	= false;
 
 	if (typeof src !== 'undefined') {
 		this.load(src);
@@ -50,6 +53,7 @@ PhotoEditor.MAX_SCALE = 1.5;
  * @param function onerror
  */
 PhotoEditor.prototype.load = function(src, onload, onerror) {
+
 	var self = this;
 	self.img = new Image();
 	self.img.onerror = function() {
@@ -59,7 +63,7 @@ PhotoEditor.prototype.load = function(src, onload, onerror) {
 	}
 	self.img.onload = function(){
 		self.initEditCtx();
-		self.render();
+		self.isReady = true;
 		if ((typeof onload).toLowerCase() === 'function') {
 			onload();
 		}
@@ -140,6 +144,7 @@ PhotoEditor.prototype.updateEditCtxLog = function(x,y,w,h) {
 		this.editCtxLog.push(PhotoEditor.utils.copy(this.editCtx));
 		this.editCtxIdx = this.editCtxLog.length-1;
 	}
+	this.updated = true;
 }
 
 
@@ -149,6 +154,10 @@ PhotoEditor.prototype.updateEditCtxLog = function(x,y,w,h) {
  *
  */
 PhotoEditor.prototype.render = function() {
+
+	if (!this.isReady || !this.updated) {
+		return;
+	}
 
 	this.prerender();
 
@@ -163,6 +172,7 @@ PhotoEditor.prototype.render = function() {
 	this.canvasCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 	this.canvasCtx.drawImage(this.buffer,width/2+x,height/2+y,w,h,0,0,this.canvas.width,this.canvas.height);
 
+	this.updated = false;
 }
 
 /**
@@ -249,9 +259,6 @@ PhotoEditor.prototype.scale = function(scale) {
 	var x = this.editCtx.x+(this.editCtx.width-w)/2;
 	var y = this.editCtx.y+(this.editCtx.height-h)/2;
 	this.updateEditCtxPos(x, y, w, h);
-
-	this.render();
-
 }
 
 
@@ -266,7 +273,6 @@ PhotoEditor.prototype.rotate = function(degree) {
 	this.clear();
 	this.editCtx.rotate = degree;
 	this.updateEditCtxLog();
-	this.render();
 }
 
 
@@ -291,8 +297,6 @@ PhotoEditor.prototype.move = function(x,y) {
 
 	this.updateEditCtxLog();
 
-	this.render();
-
 }
 
 
@@ -303,7 +307,6 @@ PhotoEditor.prototype.move = function(x,y) {
 PhotoEditor.prototype.clear = function() {
 	this.editCtx = $.extend({},this.defaultCtx);
 	this.updateEditCtxLog();
-	this.render();
 }
 
 
@@ -314,7 +317,7 @@ PhotoEditor.prototype.undo = function() {
 	if (this.editCtxIdx > 0) {
 		this.editCtxIdx--;
 		this.editCtx = PhotoEditor.utils.copy(this.editCtxLog[this.editCtxIdx]);
-		this.render();
+		this.updated = true;
 	}
 }
 
@@ -333,7 +336,7 @@ PhotoEditor.prototype.redo = function() {
 	if (this.editCtxIdx+1 < this.editCtxLog.length) {
 		this.editCtxIdx++;
 		this.editCtx = PhotoEditor.utils.copy(this.editCtxLog[this.editCtxIdx]);
-		this.render();
+		this.updated = true;
 	}
 }
 

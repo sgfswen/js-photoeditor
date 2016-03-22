@@ -13,6 +13,18 @@ $(function(){
 
 
 
+	var stats = new Stats();
+	stats.domElement.style.position = 'fixed';
+	stats.domElement.style.right	= '5px';
+	stats.domElement.style.top 		= '5px';
+	document.body.appendChild( stats.domElement );
+	var update = function () {
+		editor.render();
+		stats.update();
+		requestAnimationFrame( update );
+	};
+	requestAnimationFrame( update );
+
 
 
 
@@ -31,7 +43,7 @@ $(function(){
 	}).val(scale);
 
 	$('body').append($(editor.canvas));
-	$('body').append($(editor.buffer));
+	// $('body').append($(editor.buffer));
 
 	var value = 10;
 	$('#up').click(function(){ editor.move(0,- value);});
@@ -150,16 +162,6 @@ $(function(){
 	})();
 
 
-	(function(){
-		var stats = new Stats();
-		stats.domElement.style.position = 'fixed';
-		stats.domElement.style.right	= '5px';
-		stats.domElement.style.top 		= '5px';
-		document.body.appendChild( stats.domElement );
-		setInterval(function(){
-			stats.update();
-		}, 1000/60);
-	})();
 
 });
 
