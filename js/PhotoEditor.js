@@ -279,12 +279,26 @@ PhotoEditor.prototype.scale = function(scale) {
 		return;
 	}
 
-	scale = 1-(scale-1);
+	scale = 1 - ( scale - 1 );
 
-	var w = this.defaultCtx.width * scale;
+	var w = this.defaultCtx.width  * scale;
 	var h = this.defaultCtx.height * scale;
-	var x = this.editCtx.x+(this.editCtx.width-w)/2;
-	var y = this.editCtx.y+(this.editCtx.height-h)/2;
+	var x = this.editCtx.x + (this.editCtx.width  - w) / 2;
+	var y = this.editCtx.y + (this.editCtx.height - h) / 2;
+
+	if (this.minX > x) {
+		x = this.minX;
+	}
+	else if (this.maxX < x) {
+		x = this.maxX;
+	}
+	if (this.minY > y) {
+		y = this.minY;
+	}
+	else if (this.maxY < y) {
+		y = this.maxY;
+	}
+
 	this.updateEditCtxPos(x, y, w, h);
 }
 
