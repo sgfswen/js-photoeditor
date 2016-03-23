@@ -140,7 +140,7 @@ $(function(){
 				editor.move(x,- y);
 			}
 			else if (isGesturing) {
-				scale += (calcScale(event) - prevScale)*0.5;
+				scale += (calcScale(event) - prevScale)*0.1;
 				prevScale = calcScale(event);
 				scale = Math.min(Math.max(scale, 100), 150);
 				editor.scale(scale/100);

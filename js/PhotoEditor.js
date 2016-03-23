@@ -81,6 +81,7 @@ PhotoEditor.prototype.init = function() {
 
 	var rect = this.editRect();
 	this.updateEditCtxPos(rect.x, rect.y, rect.w, rect.h);
+	this.updateEditCtxLog();
 
 	this.defaultCtx = PhotoEditor.utils.copy(this.editCtx);
 
@@ -141,7 +142,6 @@ PhotoEditor.prototype.updateEditCtxPos = function(x,y,width,height) {
 	this.editCtx.y 		= y;
 	this.editCtx.width 	= width;
 	this.editCtx.height = height;
-	this.updateEditCtxLog();
 	this.updateMoveRange();
 }
 
@@ -286,6 +286,8 @@ PhotoEditor.prototype.scale = function(scale) {
 	var x = this.editCtx.x + (this.editCtx.width  - w) / 2;
 	var y = this.editCtx.y + (this.editCtx.height - h) / 2;
 
+	this.updateEditCtxPos(x, y, w, h);
+
 	if (this.minX > x) {
 		x = this.minX;
 	}
@@ -300,6 +302,7 @@ PhotoEditor.prototype.scale = function(scale) {
 	}
 
 	this.updateEditCtxPos(x, y, w, h);
+	this.updateEditCtxLog();
 }
 
 
