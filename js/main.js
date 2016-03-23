@@ -3,6 +3,9 @@ $(function(){
 	var editor = new PhotoEditor(400,300);
 	editor.load('data/image3.png', 
 		function(){
+			if (editor.debug) {
+				$('body').append($(editor.buffer));
+			}
 			console.log('complete');
 		}, 
 		function(){
@@ -10,23 +13,27 @@ $(function(){
 		}
 	);
 
+	// 
+	var stats;
+	if (editor.debug) {
+		stats = new Stats();
+		stats.domElement.style.position = 'fixed';
+		stats.domElement.style.right	= '5px';
+		stats.domElement.style.top 		= '5px';
+		document.body.appendChild( stats.domElement );
+	}
 
-
-
-	var stats = new Stats();
-	stats.domElement.style.position = 'fixed';
-	stats.domElement.style.right	= '5px';
-	stats.domElement.style.top 		= '5px';
-	document.body.appendChild( stats.domElement );
+	// 
 	var update = function () {
+
+		if (stats){
+			stats.update();	
+		}
+
 		editor.render();
-		stats.update();
 		requestAnimationFrame( update );
 	};
 	requestAnimationFrame( update );
-
-
-
 
 
 	var degree = 0;
@@ -43,7 +50,6 @@ $(function(){
 	}).val(scale);
 
 	$('body').append($(editor.canvas));
-	// $('body').append($(editor.buffer));
 
 	var value = 10;
 	$('#up').click(function(){ editor.move(0,- value);});

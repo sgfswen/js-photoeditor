@@ -19,14 +19,14 @@ var PhotoEditor = function(width, height, src){
 
 	this.canvas 	= PhotoEditor.utils.makeCanvas(width, height);
 	this.canvasCtx 	= this.canvas.getContext('2d');
-	this.buffer 	= PhotoEditor.utils.makeCanvas(width*8, height*8);
-	this.bufferCtx 	= this.buffer.getContext('2d');
+	this.buffer 	= null;
+	this.bufferCtx 	= null;
 	this.img 		= null;
 
-	this.minX 	= 0;
-	this.minY 	= 0;
-	this.maxX 	= 0;
-	this.maxY 	= 0;
+	this.minX 		= 0;
+	this.minY 		= 0;
+	this.maxX 		= 0;
+	this.maxY 		= 0;
 
 	this.log 		= false;
 
@@ -62,8 +62,7 @@ PhotoEditor.prototype.load = function(src, onload, onerror) {
 		}
 	}
 	self.img.onload = function(){
-		self.initEditCtx();
-		self.isReady = true;
+		self.init();
 		if ((typeof onload).toLowerCase() === 'function') {
 			onload();
 		}
@@ -75,12 +74,23 @@ PhotoEditor.prototype.load = function(src, onload, onerror) {
 /**
  *
  */
-PhotoEditor.prototype.initEditCtx = function() {
+PhotoEditor.prototype.init = function() {
+
 	this.editCtxIdx = 0;
 	this.editCtxLog = [];
+
 	var rect = this.editRect();
 	this.updateEditCtxPos(rect.x, rect.y, rect.w, rect.h);
+
 	this.defaultCtx = PhotoEditor.utils.copy(this.editCtx);
+
+	var s 			= Math.max(this.calcScale(true), this.calcScale(false));
+	var w 			= Math.max(this.img.width, this.img.height);
+	this.buffer 	= PhotoEditor.utils.makeCanvas(w*s, w*s);
+	this.bufferCtx 	= this.buffer.getContext('2d');
+
+	this.isReady = true;
+
 }
 
 
@@ -132,6 +142,7 @@ PhotoEditor.prototype.updateEditCtxPos = function(x,y,width,height) {
 	this.editCtx.width 	= width;
 	this.editCtx.height = height;
 	this.updateEditCtxLog();
+	this.updateMoveRange();
 }
 
 /**
@@ -147,7 +158,32 @@ PhotoEditor.prototype.updateEditCtxLog = function(x,y,w,h) {
 	this.updated = true;
 }
 
+/**
+ * 移動範囲の座標幅を更新
+ *
+ */
+PhotoEditor.prototype.updateMoveRange = function() {
 
+	var scale = this.calcScale(this.isReversed());
+
+	if (this.isReversed()) {
+		this.minX = (this.img.width  - this.img.height * scale)/2;
+		this.maxX =  this.img.height < this.img.width
+				  ? (this.img.width  - this.img.height * scale)/2 + this.defaultCtx.height - this.editCtx.height
+				  : (this.img.height * scale - this.img.width )/2 + this.defaultCtx.width  - this.editCtx.width;
+		this.minY = (this.img.height - this.img.width  * scale)/2;
+		this.maxY =  this.img.height > this.img.width 
+				  ? (this.img.height - this.img.width  * scale)/2 + this.defaultCtx.width  - this.editCtx.width
+				  : (this.img.width  * scale - this.img.height)/2 + this.defaultCtx.height - this.editCtx.height;
+	}
+	else {
+		this.minX = 0;
+		this.minY = 0;
+		this.maxX = (this.img.width  * scale - this.editCtx.width);
+		this.maxY = (this.img.height * scale - this.editCtx.height);
+	}
+
+}
 
 
 /**
@@ -180,38 +216,7 @@ PhotoEditor.prototype.render = function() {
  */
 PhotoEditor.prototype.prerender = function() {
 
-	var scale = 1;
-	if (this.isReversed()) {
-		if (
-			this.defaultCtx.width > this.img.height
-		 || this.defaultCtx.height < this.img.width
-		) {
-			scale = this.defaultCtx.width/this.img.height;
-		}
-		else if (
-			this.defaultCtx.height > this.img.width
-		 || this.defaultCtx.width < this.img.height) {
-			scale = this.defaultCtx.height/this.img.width;
-		}
-	}
-
-
-	if (this.isReversed()) {
-		this.minX = (this.img.width  - this.img.height * scale)/2;
-		this.maxX =  this.img.height < this.img.width
-				  ? (this.img.width  - this.img.height * scale)/2 + this.defaultCtx.height - this.editCtx.height
-				  : (this.img.height * scale - this.img.width )/2 + this.defaultCtx.width  - this.editCtx.width;
-		this.minY = (this.img.height - this.img.width  * scale)/2;
-		this.maxY =  this.img.height > this.img.width 
-				  ? (this.img.height - this.img.width  * scale)/2 + this.defaultCtx.width  - this.editCtx.width
-				  : (this.img.width  * scale - this.img.height)/2 + this.defaultCtx.height - this.editCtx.height;
-	}
-	else {
-		this.minX = 0;
-		this.minY = 0;
-		this.maxX = (this.img.width  * scale - this.editCtx.width);
-		this.maxY = (this.img.height * scale - this.editCtx.height);
-	}
+	var scale = this.calcScale(this.isReversed());
 
 	var width 	= this.buffer.width-this.img.width;
 	var height 	= this.buffer.height-this.img.height;
@@ -225,7 +230,6 @@ PhotoEditor.prototype.prerender = function() {
 	this.bufferCtx.drawImage(this.img, width/2, height/2, this.img.width, this.img.height);
 	this.bufferCtx.restore();
 
-
 	if (this.debug) {
 		var x = width/2+this.editCtx.x;
 		var y = height/2+this.editCtx.y;
@@ -235,6 +239,29 @@ PhotoEditor.prototype.prerender = function() {
 		this.bufferCtx.fillRect(x,y,w,h);
 	}
 
+}
+
+
+/**
+ * 縦横と回転状況によって拡縮率を計算
+ * @return int 
+ */
+PhotoEditor.prototype.calcScale = function(isReversed) {
+	var scale = 1;
+	if (isReversed) {
+		if (
+			this.defaultCtx.width > this.img.height
+		 || this.defaultCtx.height < this.img.width
+		) {
+			scale = this.defaultCtx.width/this.img.height;
+		}
+		else if (
+			this.defaultCtx.height > this.img.width
+		 || this.defaultCtx.width < this.img.height) {
+			scale = this.defaultCtx.height/this.img.width;
+		}
+	}
+	return scale;
 }
 
 
@@ -272,6 +299,7 @@ PhotoEditor.prototype.scale = function(scale) {
 PhotoEditor.prototype.rotate = function(degree) {
 	this.clear();
 	this.editCtx.rotate = degree;
+	this.updateMoveRange();
 	this.updateEditCtxLog();
 }
 
