@@ -325,7 +325,7 @@ PhotoEditor.prototype.undo = function() {
  *
  */
 PhotoEditor.prototype.isReversed = function() {
-	return this.editCtx.rotate % 360 == 90 || this.editCtx.rotate % 360 == 270;
+	return Math.abs(this.editCtx.rotate) % 360 == 90 || Math.abs(this.editCtx.rotate) % 360 == 270;
 }
 
 
