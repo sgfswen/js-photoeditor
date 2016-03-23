@@ -118,46 +118,41 @@ $(function(){
 		function onTouchStart( event ) {
 			event.preventDefault();
 			isTouching = true;
-			prevX = event.changedTouches[0].pageX;
-			prevY = event.changedTouches[0].pageY;
+			prevX = event.targetTouches[0].pageX;
+			prevY = event.targetTouches[0].pageY;
+			if (event.targetTouches.length > 1) {
+				isGesturing = true;
+				prevScale = calcScale(event);
+			}
 		}
 		function onTouchMove ( event ) {
 			if ( isTouching && !isGesturing) {
-				var x = prevX - event.changedTouches[0].pageX;
-				var y = event.changedTouches[0].pageY - prevY;
-				prevX = event.changedTouches[0].pageX;
-				prevY = event.changedTouches[0].pageY;
+				var x = prevX - event.targetTouches[0].pageX;
+				var y = event.targetTouches[0].pageY - prevY;
+				prevX = event.targetTouches[0].pageX;
+				prevY = event.targetTouches[0].pageY;
 				editor.move(x,- y);
 			}
-		}
-		function onTouchEnd ( event ) {
-			isTouching = false;
-		}
-
-		// gesture event handlers
-		function onGestureStart( event ) {
-			event.preventDefault();
-			isGesturing = true;
-			prevScale = event.scale;
-		}
-		function onGestureChage( event ) {
-			if (isGesturing) {
-				scale += (event.scale - prevScale)*10;
-				prevScale = event.scale;
+			else if (isGesturing) {
+				scale += (calcScale(event) - prevScale)*0.5;
+				prevScale = calcScale(event);
 				scale = Math.min(Math.max(scale, 100), 150);
 				editor.scale(scale/100);
 			}
 		}
-		function onGestureEnd( event ) {
+		function onTouchEnd ( event ) {
 			isGesturing = false;
+			isTouching = false;
+		}
+
+		function calcScale(event) {
+			return Math.sqrt(Math.pow((event.targetTouches[1].pageX - event.targetTouches[0].pageX),2)
+				 + Math.pow((event.targetTouches[1].pageY - event.targetTouches[0].pageY),2));
 		}
 
 		editor.canvas.addEventListener( 'touchstart', onTouchStart, false );
 		editor.canvas.addEventListener( 'touchmove', onTouchMove, false );
 		editor.canvas.addEventListener( 'touchend', onTouchEnd, false );
-		editor.canvas.addEventListener( 'gesturestart', onGestureStart, false );
-		editor.canvas.addEventListener( 'gesturechange', onGestureChage, false );
-		editor.canvas.addEventListener( 'gestureend', onGestureEnd, false );
 
 	})();
 
